@@ -20,9 +20,10 @@ on:
 
 jobs:
   validate:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     env:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
@@ -30,7 +31,6 @@ jobs:
         with:
           fetch-depth: 0
       - name: Reject generated index edits in PR
-        if: github.event_name == 'pull_request'
         run: |
           git fetch origin "${{ github.base_ref }}" --depth=1
           changed="$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)"
@@ -40,13 +40,20 @@ jobs:
             exit 1
           fi
       - name: Validate entries
-        if: github.event_name == 'pull_request'
         run: python scripts/registry_index.py --validate-downloads --validate-only
+
+  build-index:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
       - name: Build public index
-        if: github.event_name != 'pull_request'
         run: python scripts/registry_index.py --validate-downloads
       - name: Commit generated index
-        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet -- public/v1; then
             echo "Generated index is up to date."
