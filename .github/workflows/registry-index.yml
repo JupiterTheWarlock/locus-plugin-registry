@@ -18,12 +18,13 @@ on:
     - cron: "17 * * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,17 +40,13 @@ jobs:
             exit 1
           fi
       - name: Validate entries
+        if: github.event_name == 'pull_request'
         run: python scripts/registry_index.py --validate-downloads --validate-only
-
-  build-index:
-    if: github.event_name != 'pull_request'
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Build public index
+        if: github.event_name != 'pull_request'
         run: python scripts/registry_index.py --validate-downloads
       - name: Commit generated index
+        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet -- public/v1; then
             echo "Generated index is up to date."
