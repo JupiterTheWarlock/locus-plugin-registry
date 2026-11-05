@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-05T06:54:38Z",
+  "generatedAt": "2026-11-05T15:31:43Z",
   "plugins": [
     {
       "id": "locus-ralph-loop",
@@ -29,7 +29,7 @@
         {
           "id": "releaseDownloads",
           "label": "Release downloads",
-          "value": 4104
+          "value": 4107
         }
       ]
     }
